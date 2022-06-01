@@ -69,6 +69,7 @@ public class UserController {
     @GetMapping("/search")
     public ResponseEntity<Object> findByEmail(@RequestParam String email){
         Date requestDate = new Date();
+        System.out.println(userService.findByEmailUser(email).toString());
         User user = new User();
         try {
             user = userService.findByEmail(email).get();

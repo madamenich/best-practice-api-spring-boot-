@@ -11,4 +11,5 @@ public interface UserService {
     List<User> findAll(Pagination pagination);
     Optional<User> findByEmail(String email);
     void create(User registerRequest);
+    User findByEmailUser(String email);
 }

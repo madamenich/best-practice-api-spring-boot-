@@ -17,7 +17,7 @@ public interface UserRepository {
 
     //TODO:  fetch all users
 
-    @Select("select * from mn_users Order by id desc limit #{p.limit} offset #{p.offset}")
+    @Select("select * from mn_users order by id desc limit #{p.limit} offset #{p.offset}")
     @Results(id="ResultUser", value = {
             @Result(property = "id", column = "id"),
             @Result(property = "username", column = "username"),
