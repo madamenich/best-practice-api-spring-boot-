@@ -2,6 +2,8 @@ package com.hrd.basic.myprojectapi.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 @Data
 @Builder
@@ -26,6 +29,7 @@ public class User {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss",timezone = "Asia/Phnom_Penh")
     private Date updateAt = new Date();
     private Set<Role> roles = new HashSet<>();
+    private JsonElement basicInformation;
 
     public User(String username, String password) {
     }

@@ -1,6 +1,9 @@
 package com.hrd.basic.myprojectapi.dto.request;
 
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,4 +26,5 @@ public class RegisterRequest {
             = "password must be between 8 and 16 characters")
     private String password;
     private Set<String> roles = new HashSet<>();
+    private JsonElement basicInformation;
 }

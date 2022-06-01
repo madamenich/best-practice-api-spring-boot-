@@ -16,16 +16,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
-    private final UserMapper mapper;
+
     @Override
     public List<User> findAll(Pagination pagination) {
         pagination.setTotalCount(5);
-        return userRepository.findAll(pagination);
+        List<User> testList = userRepository.findAll(pagination);
+
+//        System.out.println(testList);
+
+//        System.out.println(user   Repository.findAll(pagination));
+        return testList;
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findByEmail(String email) {
+        User user =userRepository.findByEmail(email).get();
+        System.out.println(user.getBasicInformation().getAsJsonObject());
+        return user;
     }
 
     @Override
@@ -35,6 +42,6 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User findByEmailUser(String email) {
-        return mapper.getUser(email);
+        return userRepository.findByEmail(email).get();
     }
 }

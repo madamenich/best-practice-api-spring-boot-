@@ -1,5 +1,6 @@
 package com.hrd.basic.myprojectapi.controller;
 
+import com.google.gson.Gson;
 import com.hrd.basic.myprojectapi.dto.payload.ErrorPayload;
 import com.hrd.basic.myprojectapi.dto.request.RegisterRequest;
 import com.hrd.basic.myprojectapi.dto.response.*;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/v1/users")
+@RequestMapping(value = "/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -38,48 +40,58 @@ public class UserController {
 //    private final PasswordEncoder encoder;
 
 
-
-    @Operation(operationId = "getAll",description = "Return A List Of users.",summary = "FindAllUser")
-    @ApiResponses( value = {
-            @ApiResponse(responseCode = "200",description = "Users have retrieved successfully",content = @Content(schema = @Schema(implementation = AllUserResponse.class))),
-            @ApiResponse(responseCode = "404",description = CustomMessage.NOT_FOUND,content = @Content(schema = @Schema(implementation = SingleErrorResponse.class)))
+    @Operation(operationId = "getAll", description = "Return A List Of users.", summary = "FindAllUser")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users have retrieved successfully", content = @Content(schema = @Schema(implementation = AllUserResponse.class))),
+            @ApiResponse(responseCode = "404", description = CustomMessage.NOT_FOUND, content = @Content(schema = @Schema(implementation = SingleErrorResponse.class)))
     })
-    @GetMapping()
-    public ResponseEntity<Object> findAllUser(HttpServletRequest request, @RequestParam("page") String page, @RequestParam("limit") String limit) {
-        Date requestTime =  new Date();
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findAllUser(HttpServletRequest request, @RequestParam("page") String page, @RequestParam("limit") String limit) {
+        Date requestTime = new Date();
         List<User> userList;
 
-        if ( Integer.parseInt(page) <= 0 || Integer.parseInt(limit) <= 0){
+        if (Integer.parseInt(page) <= 0 || Integer.parseInt(limit) <= 0) {
             return new ResponseEntity<>(new SingleErrorResponse(400, CustomMessage.BAD_REQUEST, requestTime, "page and limit must be greater than 0"), HttpStatus.BAD_REQUEST);
         }
-        Pagination pagination =  new Pagination(Integer.parseInt(page),Integer.parseInt(limit));
-        try{
-            userList  = userService.findAll(pagination);
+        Pagination pagination = new Pagination(Integer.parseInt(page), Integer.parseInt(limit));
+        try {
+            userList = userService.findAll(pagination);
+            userList.forEach(System.out::println);
 
-            if (userList.isEmpty()){
+            if (userList.isEmpty()) {
                 throw new NoSuchElementException("User Not Found!");
             }
 
-        }catch(NoSuchElementException ex){
+        } catch (NoSuchElementException ex) {
             return new ResponseEntity<>(new SingleErrorResponse(404, CustomMessage.NOT_FOUND, requestTime, ex.getMessage()), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(new AllUserResponse(200,"Users have retrieved successfully ",requestTime,userList, pagination), HttpStatus.OK);
+        return new ResponseEntity<>(new AllUserResponse(200, "Users have retrieved successfully ", requestTime, userList, pagination), HttpStatus.OK);
     }
 
+
+    @GetMapping(value = "/test/json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<User> showAll() {
+        Date requestTime = new Date();
+
+        Pagination pagination = new Pagination(1, 10);
+        List<User> userList = userService.findAll(pagination);
+//        return new AllUserResponse(200,"Users have retrieved successfully ",requestTime,userList, pagination);
+        return userList;
+    }
+
+
     @GetMapping("/search")
-    public ResponseEntity<Object> findByEmail(@RequestParam String email){
+    public ResponseEntity<Object> findByEmail(@RequestParam String email) {
         Date requestDate = new Date();
-        System.out.println(userService.findByEmailUser(email).toString());
+//        System.out.println(userService.findByEmail(email).get().toString());
         User user = new User();
         try {
-            user = userService.findByEmail(email).get();
+            user = userService.findByEmail(email);
 
-        }catch (NoSuchElementException e){
-            return new ResponseEntity<>(new SingleErrorResponse(404, CustomMessage.NOT_FOUND, requestDate, e.getMessage()),HttpStatus.NOT_FOUND);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(new SingleErrorResponse(404, CustomMessage.NOT_FOUND, requestDate, e.getMessage()), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(new FindOneUseresponse(200,"User has retrieved successfully", requestDate,user),HttpStatus.OK);
-
-
+        return new ResponseEntity<>(new FindOneUseresponse(200, "User has retrieved successfully", requestDate, user), HttpStatus.OK);
 
 
     }
@@ -90,18 +102,18 @@ public class UserController {
         Date requestTime = new Date();
         AtomicBoolean isAExistingUser = new AtomicBoolean(false);
         List<ErrorPayload> errors = new ArrayList<>();
-        if (bindingResult.hasErrors()){
-            userService.findByEmail(registerRequest.getUsername()).ifPresent(name ->errors.add(new ErrorPayload("Email","email already exist!")));
-            bindingResult.getFieldErrors().forEach(fieldError -> errors.add(new ErrorPayload(fieldError.getField(),fieldError.getDefaultMessage())));
-            return  new ResponseEntity<>(new ErrorResponse(406, CustomMessage.VALIDATION_ERROR,requestTime,errors),HttpStatus.BAD_REQUEST);
-        }
-        userService.findByEmail(registerRequest.getUsername()).ifPresent(name ->{
-            errors.add(new ErrorPayload("email","email already exist!"));
-            isAExistingUser.set(true);
-        });
-        if (isAExistingUser.get()){
-            return  new ResponseEntity<>(new ErrorResponse(406, CustomMessage.VALIDATION_ERROR,requestTime,errors),HttpStatus.BAD_REQUEST);
-        }
+//        if (bindingResult.hasErrors()){
+//            userService.findByEmail(registerRequest.getUsername()).ifPresent(name ->errors.add(new ErrorPayload("Email","email already exist!")));
+//            bindingResult.getFieldErrors().forEach(fieldError -> errors.add(new ErrorPayload(fieldError.getField(),fieldError.getDefaultMessage())));
+//            return  new ResponseEntity<>(new ErrorResponse(406, CustomMessage.VALIDATION_ERROR,requestTime,errors),HttpStatus.BAD_REQUEST);
+//        }
+//        userService.findByEmail(registerRequest.getUsername()).ifPresent(name ->{
+//            errors.add(new ErrorPayload("email","email already exist!"));
+//            isAExistingUser.set(true);
+//        });
+//        if (isAExistingUser.get()){
+//            return  new ResponseEntity<>(new ErrorResponse(406, CustomMessage.VALIDATION_ERROR,requestTime,errors),HttpStatus.BAD_REQUEST);
+//        }
         try {
             User user = new User(
                     registerRequest.getUsername(),registerRequest.getPassword());
@@ -133,6 +145,10 @@ public class UserController {
             u.setPassword(registerRequest.getPassword());
 //            u.setCreateAt(new Date());
             u.setStatus(true);
+            Gson gson = new Gson();
+
+            u.setBasicInformation(registerRequest.getBasicInformation());
+            System.out.println("work");
 
             userService.create(u);
             roles.forEach(role -> userRoleRepository.save(user.getId(),role.getId()));
@@ -140,4 +156,10 @@ public class UserController {
         } catch (Exception ex) {
             return new ResponseEntity<>(new AuthRegisterResponse(400,ex.getMessage(),requestTime,registerRequest),HttpStatus.BAD_REQUEST);
         }
-    }}
+    }
+
+//    @PostMapping("/add")
+
+
+
+}
